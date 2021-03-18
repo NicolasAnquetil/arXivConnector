@@ -24,6 +24,7 @@ ArXArticleFactory >> articleFrom: aSteam [
 	article url: self getURL.
 	article authors: self getAuthors.
 	article abstract: self getAbstract.
+	article comment: self getComments.
 	^ article
 ]
 
@@ -50,7 +51,7 @@ ArXArticleFactory >> content: aMessage [
 
 { #category : #factory }
 ArXArticleFactory >> getAbstract [
-	"abstract starts after an empty line after the Title: line
+	"abstract starts after an empty line after the 'Authors:' line
 	 and ends with the body"
 	| startLine |
 	startLine := self lineFor: [ :l | l beginsWith: 'Authors:'] fromLine: self bodyStart toLine: self bodyEnd.
@@ -63,6 +64,24 @@ ArXArticleFactory >> getAuthors [
 	"authors can be multiline, ended by next field: Categories"
 
 	^ self getMultilineField: 'Authors:' endedBy: 'Categories:'
+]
+
+{ #category : #factory }
+ArXArticleFactory >> getComments [
+	"Comments are optional and can be multiline
+	 They start with 'Comments: ' and end with an empty line"
+	| prefix startLine endLine |
+	prefix := 'Comments:'.
+	startLine := self lineFor: [ :l | l beginsWith: prefix] fromLine: self bodyStart toLine: self bodyEnd.
+	startLine == 0
+	ifTrue: [ ^'' ].
+
+	endLine := self lineFor: [ :l | l isEmpty ] fromLine: startLine toLine: self bodyEnd.
+
+	^String streamContents: [:s |
+		s nextPutAll: ((lines at: startLine) allButFirst: prefix size + 1 ).
+		(startLine+1) to: (endLine-1) do: [ :i | s cr ; nextPutAll: (lines at: i)	]
+	]
 ]
 
 { #category : #'private-parsing' }
@@ -94,22 +113,6 @@ ArXArticleFactory >> getKeywords [
 ]
 
 { #category : #'private-parsing' }
-ArXArticleFactory >> getMultiline [
-	| endLine startLine |
-	startLine := self
-		lineFor: [ :l | l beginsWith: 'Authors:' ]
-		fromLine: self bodyStart
-		toLine: self bodyEnd.
-	endLine := self
-		lineFor: [ :l | l beginsWith: 'Categories:' ]
-		fromLine: startLine
-		toLine: self bodyEnd.
-	^ self
-		joinMultiline: (lines copyFrom: startLine + 1 to: endLine - 1)
-		forField: 'Authors:'
-]
-
-{ #category : #'private-parsing' }
 ArXArticleFactory >> getMultilineField: startString endedBy: endString [
 	| endLine startLine |
 	startLine := self
@@ -138,6 +141,7 @@ ArXArticleFactory >> getURL [
 
 { #category : #'private-parsing' }
 ArXArticleFactory >> joinMultiline: anArrayOfString forField: aPrefix [
+	"removes aPrefix from first line in anArrayOfString, joins all strings into one, removing a space at the start of line 2 and following"
 	^String streamContents: [:s |
 		s nextPutAll: (anArrayOfString first allButFirst: aPrefix size + 1 ).
 		anArrayOfString allButFirstDo: [ :line |

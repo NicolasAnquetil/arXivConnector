@@ -69,7 +69,9 @@ Authors: These are the authors
   also
 Categories: cs.SE
 Classifier: cs.SE 1
-Status: next
+Status: submitted - Scheduled for announcement: 2021-03-18 20:00 EDT
+Comments: This is a comment
+It has 2 lines
 
   And this is a multi line abstract.
 It is a bit uninformative, but we don''t care,
@@ -110,6 +112,7 @@ TestArXArticleFactory >> testArticleAlone [
 	self assert: art title equals: 'This is a Title on 2 lines'.
 	self assert: art authors equals: 'These are the authors on several lines also'.
 	self assert: art url equals: 'http://arxiv.org/mod/123456789'.
+	self assert: art comment equals: ''.
 	self assert: art abstract = '  And this is a multi line abstract.
 It is a bit uninformative, but we don''t care,
 as it is for testing purposes'
@@ -126,6 +129,8 @@ TestArXArticleFactory >> testArticleWithNote [
 	self assert: art title equals: 'This is a Title on 2 lines'.
 	self assert: art authors equals: 'These are the authors on several lines also'.
 	self assert: art url equals: 'http://arxiv.org/mod/123456789'.
+	self assert: art comment equals: 'This is a comment
+It has 2 lines'.
 	self assert: art abstract = '  And this is a multi line abstract.
 It is a bit uninformative, but we don''t care,
 as it is for testing purposes
@@ -164,12 +169,12 @@ TestArXArticleFactory >> testLineFor [
 { #category : #tests }
 TestArXArticleFactory >> testParsingSetup [
 	factory lines: self exampleWithNote lines.
-	self assert: factory lines size equals: 51.
+	self assert: factory lines size equals: 53.
 
 	factory setMessageBounds.
 	self assert: factory bodyStart equals: 11.
-	self assert: factory bodyEnd equals: 33.
-	self assert: factory noteEnd equals: 50.
+	self assert: factory bodyEnd equals: 35.
+	self assert: factory noteEnd equals: 52.
 	
 	
 ]

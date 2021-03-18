@@ -5,7 +5,8 @@ Class {
 		'title',
 		'url',
 		'authors',
-		'abstract'
+		'abstract',
+		'comment'
 	],
 	#category : #'arXiv-core'
 }
@@ -29,6 +30,7 @@ ArXArticle >> asPharoteroItem: aJSONString [
 	pharoteroItem url: url.
 	pharoteroItem abstract: abstract.
 	pharoteroItem authors: (self parseAuthors: authors).
+	pharoteroItem comment: self comment.
 	^pharoteroItem 
 ]
 
@@ -40,6 +42,16 @@ ArXArticle >> authors [
 { #category : #accessing }
 ArXArticle >> authors: anObject [
 	authors := anObject
+]
+
+{ #category : #accessing }
+ArXArticle >> comment [
+	^ comment
+]
+
+{ #category : #accessing }
+ArXArticle >> comment: anObject [
+	comment := anObject
 ]
 
 { #category : #printing }
