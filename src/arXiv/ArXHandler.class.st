@@ -4,7 +4,7 @@ Usage: arXiv <cmd>
 Commands:
   importMessage <file.mbox> -- Imports given mbox file into DB (outputs a backup of the DB)
   importWithKey <file.mbox> <key> -- Imports given mbox file into DB
-  zotero <file.mbox> <collection> -- Imports given mbox file into Zotero collection
+  zotero <file.mbox> [ <collection> ] -- Imports given mbox file into Zotero collection
   listKeywords -- list all indexing key words in the DB
   listArticles -- list all indexed articles in the DB
   searchKeyword <keyword> -- search articles indexed with a given keyword
@@ -70,6 +70,18 @@ ArXHandler >> cleanBackups [
 { #category : #'private - utilities' }
 ArXHandler >> countArticles [
 	^(articles values flatCollectAsSet: #yourself) size
+]
+
+{ #category : #'private - utilities' }
+ArXHandler >> getCollection [
+	(self arguments size > 2)
+	ifTrue: [ ^ ' ' join: (self arguments allButFirst: 2) ].
+
+	PharoteroServer new desktopClientIsUp
+	ifFalse: [ self exitFailure: 'Could not find a Zotero collection, none found in parameters and desktop client not running' ].
+
+	^PharoteroServer new desktopCurrentCollection
+		ifNil: [ self exitFailure: 'Failed to retrieve current Zotero collection from desktop client' ]
 ]
 
 { #category : #'private - utilities' }
@@ -293,15 +305,15 @@ ArXHandler >> secondaryBackup [
 ArXHandler >> zotero [
 	| key file |
 
-	(self arguments size < 3)
+	(self arguments size < 2)
 	ifTrue: [ 
-		self exitFailure: 'zotero requires at least 2 arguments: <file.mbox> <collection>'	].
+		self exitFailure: 'zotero requires at least 1 argument: <file.mbox> [ <collection> ]'	].
 
 	file := self getMboxFile: (self arguments second).
 	file ifNil: [ self exitFailure: 'Could not process file: ' , self arguments second].
 	self parseMessage: file.
 
-	key := ' ' join: (self arguments allButFirst: 2).
+	key := self getCollection.
 
 	factory article toZoteroCollection: key
 
