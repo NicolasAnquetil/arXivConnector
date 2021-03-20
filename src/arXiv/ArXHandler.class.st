@@ -47,6 +47,12 @@ ArXHandler >> activate [
 	self exitSuccess 
 ]
 
+{ #category : #helpers }
+ArXHandler >> allKeys [
+	^(self articles associations
+		sorted: [ :a :b | a key < b key ])
+]
+
 { #category : #accessing }
 ArXHandler >> articles [
 	^articles
@@ -67,7 +73,7 @@ ArXHandler >> cleanBackups [
 	self removeBackupsAfterVersion: 4
 ]
 
-{ #category : #'private - utilities' }
+{ #category : #helpers }
 ArXHandler >> countArticles [
 	^(articles values flatCollectAsSet: #yourself) size
 ]
@@ -140,6 +146,12 @@ ArXHandler >> initialize [
 	factory := ArXArticleFactory new
 ]
 
+{ #category : #helpers }
+ArXHandler >> keysOwningArticle: anArticle [
+	^self articles associations select: [ :keyAndArticles |
+		keyAndArticles value anySatisfy: [ :art | art = anArticle]]
+]
+
 { #category : #'private - utilities' }
 ArXHandler >> keyword: key add: article [
 	| coll |
@@ -169,13 +181,11 @@ ArXHandler >> listKeywords [
 	|totalArt|
 	totalArt := 0.
 	self reloadDB.
-	(self articles associations
-		sorted: [ :a :b | a key < b key ])
-		do: [ :assoc ||nbArt|
-			nbArt := assoc value size.
+	self allKeys do: [ :keyAndArticles || nbArt |
+		nbArt := keyAndArticles value size.
 			totalArt := totalArt + nbArt.
 			self stdout
-				nextPutAll: (assoc key) ;
+				nextPutAll: (keyAndArticles key) ;
 				nextPutAll: ' - ' ;
 				nextPutAll: (nbArt asString) ;
 				nextPut: Character cr
@@ -225,7 +235,7 @@ ArXHandler >> parseMessage: file [
 	^file readStreamDo: [ :st | factory articleFrom: st ].
 ]
 
-{ #category : #'private - utilities' }
+{ #category : #helpers }
 ArXHandler >> reloadDB [
 	articles := self backupFilename asFileReference
 		readStreamDo: [ :st | STON fromStream: st].
