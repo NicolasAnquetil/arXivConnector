@@ -83,11 +83,21 @@ ArXHandler >> getCollection [
 	(self arguments size > 2)
 	ifTrue: [ ^ ' ' join: (self arguments allButFirst: 2) ].
 
+	^[self getCollectionFromZotero]
+	on: Exception
+	do: [ :except |
+		self exitFailure: except messageText
+	]
+
+]
+
+{ #category : #helpers }
+ArXHandler >> getCollectionFromZotero [
 	PharoteroServer new desktopClientIsUp
-	ifFalse: [ self exitFailure: 'Could not find a Zotero collection, none found in parameters and desktop client not running' ].
+	ifFalse: [ Exception signal: 'Could not find a Zotero collection, none found in parameters and desktop client not running' ].
 
 	^PharoteroServer new desktopCurrentCollection
-		ifNil: [ self exitFailure: 'Failed to retrieve current Zotero collection from desktop client' ]
+		ifNil: [ Exception signal: 'Failed to retrieve current Zotero collection from desktop client' ]
 ]
 
 { #category : #'private - utilities' }
@@ -240,6 +250,16 @@ ArXHandler >> reloadDB [
 	articles := self backupFilename asFileReference
 		readStreamDo: [ :st | STON fromStream: st].
 
+]
+
+{ #category : #helpers }
+ArXHandler >> removeArticle: anArticle [
+	articles associations do: [ :keyAndArticles || newArticles |
+		newArticles := keyAndArticles value reject: [:art | art = anArticle].
+		newArticles
+			ifEmpty: [ articles removeKey: keyAndArticles key ]
+			ifNotEmpty: [ articles at: keyAndArticles key put: newArticles]
+	]
 ]
 
 { #category : #'private - utilities' }

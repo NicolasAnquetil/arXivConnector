@@ -89,6 +89,11 @@ ArXArticle >> title: anObject [
 ]
 
 { #category : #activation }
+ArXArticle >> toZotero [
+	^self toZoteroCollection: ArXHandler new getCollectionFromZotero
+]
+
+{ #category : #activation }
 ArXArticle >> toZoteroCollection: aCollectionName [
 	| zotero pharoteroItem |
 	zotero := PharoteroServer new
