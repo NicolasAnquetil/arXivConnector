@@ -4,7 +4,7 @@ Class {
 	#instVars : [
 		'factory'
 	],
-	#category : #'arXiv-tests'
+	#category : #'arXivConnector-tests'
 }
 
 { #category : #example }

@@ -13,7 +13,7 @@ Class {
 		'db',
 		'btnBar'
 	],
-	#category : #'arXiv-core'
+	#category : #'arXivConnector-core'
 }
 
 { #category : #specs }

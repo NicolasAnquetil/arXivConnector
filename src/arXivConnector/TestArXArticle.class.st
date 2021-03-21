@@ -4,7 +4,7 @@ Class {
 	#instVars : [
 		'article'
 	],
-	#category : #'arXiv-tests'
+	#category : #'arXivConnector-tests'
 }
 
 { #category : #running }

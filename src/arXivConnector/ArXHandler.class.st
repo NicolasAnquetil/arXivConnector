@@ -19,7 +19,7 @@ Class {
 		'articles',
 		'factory'
 	],
-	#category : #'arXiv-core'
+	#category : #'arXivConnector-core'
 }
 
 { #category : #accessing }

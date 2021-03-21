@@ -8,7 +8,7 @@ Class {
 		'abstract',
 		'comment'
 	],
-	#category : #'arXiv-core'
+	#category : #'arXivConnector-core'
 }
 
 { #category : #accessing }

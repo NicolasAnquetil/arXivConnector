@@ -7,7 +7,7 @@ Class {
 		'bounds',
 		'article'
 	],
-	#category : #'arXiv-core'
+	#category : #'arXivConnector-core'
 }
 
 { #category : #accessing }
