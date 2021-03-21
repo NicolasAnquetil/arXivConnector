@@ -20,7 +20,7 @@ TestArXArticle >> setUp [
 { #category : #running }
 TestArXArticle >> testAsPharoteroItem [
 	| pharoteroItem |
-	pharoteroItem := article asPharoteroItem: self zoteroEmptyDocumentJSON.
+	pharoteroItem := article asPharoteroItem.
 
 	self assert: pharoteroItem title equals: 'My nice title'.
 	self assert: pharoteroItem url equals: 'http://somewhere.com'.

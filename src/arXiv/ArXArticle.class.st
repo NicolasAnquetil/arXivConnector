@@ -22,16 +22,14 @@ ArXArticle >> abstract: anObject [
 ]
 
 { #category : #activation }
-ArXArticle >> asPharoteroItem: aJSONString [
-	| pharoteroItem |
-	pharoteroItem := (NeoJSONReader on: aJSONString readStream)
-		nextAs: PharoteroItem .
-	pharoteroItem title: title.
-	pharoteroItem url: url.
-	pharoteroItem abstract: abstract.
-	pharoteroItem authors: (self parseAuthors: authors).
-	pharoteroItem comment: self comment.
-	^pharoteroItem 
+ArXArticle >> asPharoteroItem [
+	^PharoteroItem new
+		title: title ;
+		url: url ;
+		abstract: abstract ;
+		authors: (self parseAuthors: authors) ;
+		comment: self comment ;
+		yourself
 ]
 
 { #category : #accessing }
@@ -95,16 +93,9 @@ ArXArticle >> toZotero [
 
 { #category : #activation }
 ArXArticle >> toZoteroCollection: aCollectionName [
-	| zotero pharoteroItem |
-	zotero := PharoteroServer new
+	PharoteroServer new
 		rmodIdentity ;
-		yourself.
-
-	pharoteroItem := self asPharoteroItem: (zotero newItem: 'document') readStream.
-	pharoteroItem
-		parentCollection: (zotero collectionNamed: aCollectionName) ;
-		date: Date today yyyymmdd.
-	zotero putItem: pharoteroItem
+		addItem: (self asPharoteroItem) type: 'document' in: aCollectionName
 ]
 
 { #category : #accessing }
