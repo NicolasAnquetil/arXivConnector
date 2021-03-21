@@ -9,7 +9,7 @@ BaselineOfArXiv >> baseline: spec [
 	<baseline>
 	spec for: #common do: [
 		spec baseline: 'Pharotero' with: [ spec repository: 'github://NicolasAnquetil/Pharotero' ].
-		spec package: 'arXiv'  with: [ spec requires: #('Pharotero') ]				
+		spec package: 'arXivConnector'  with: [ spec requires: #('Pharotero') ]				
 	].
 
 ]
