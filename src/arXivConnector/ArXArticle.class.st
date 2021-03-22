@@ -93,7 +93,7 @@ ArXArticle >> toZotero [
 
 { #category : #activation }
 ArXArticle >> toZoteroCollection: aCollectionName [
-	PharoteroServer new
+	PharoteroServer instance
 		rmodIdentity ;
 		addItem: (self asPharoteroItem) type: 'document' in: aCollectionName
 ]

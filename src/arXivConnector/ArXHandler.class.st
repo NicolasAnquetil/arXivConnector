@@ -93,10 +93,10 @@ ArXHandler >> getCollection [
 
 { #category : #helpers }
 ArXHandler >> getCollectionFromZotero [
-	PharoteroServer new desktopClientIsUp
+	PharoteroServer instance desktopClientIsUp
 	ifFalse: [ Exception signal: 'Could not find a Zotero collection, none found in parameters and desktop client not running' ].
 
-	^PharoteroServer new desktopCurrentCollection
+	^PharoteroServer instance desktopCurrentCollection
 		ifNil: [ Exception signal: 'Failed to retrieve current Zotero collection from desktop client' ]
 ]
 
@@ -343,8 +343,9 @@ ArXHandler >> zotero [
 	file ifNil: [ self exitFailure: 'Could not process file: ' , self arguments second].
 	self parseMessage: file.
 
+	PharoteroServer instance rmodIdentity ; reloadCollections.
+
 	key := self getCollection.
 
 	factory article toZoteroCollection: key
-
 ]
