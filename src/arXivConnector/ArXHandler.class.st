@@ -345,10 +345,14 @@ ArXHandler >> zotero [
 
 	[PharoteroServer instance rmodIdentity ; reloadCollections]
 	on: Error
-	do: [ self exitFailure: 'Error loading Zotero collections' ].
-	
-	PharoteroServer instance topCollections 
-		ifEmpty: [ self exitFailure: 'No Zotero collections found !' ].
+	do: [ (PharoteroServer instance
+			rmodIdentity ;
+			resetCollections ;
+			allCollections ) 
+		ifEmpty: [ self exitFailure: 'Error loading Zotero collections' ].
+		PharoteroServer instance
+			saveCollections ].
+
 
 	key := self getCollection.
 
