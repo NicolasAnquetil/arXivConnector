@@ -343,9 +343,16 @@ ArXHandler >> zotero [
 	file ifNil: [ self exitFailure: 'Could not process file: ' , self arguments second].
 	self parseMessage: file.
 
-	PharoteroServer instance rmodIdentity ; reloadCollections.
+	[PharoteroServer instance rmodIdentity ; reloadCollections]
+	on: Error
+	do: [ self exitFailure: 'Error loading Zotero collections' ].
+	
+	PharoteroServer instance topCollections 
+		ifEmpty: [ self exitFailure: 'No Zotero collections found !' ].
 
 	key := self getCollection.
 
-	factory article toZoteroCollection: key
+	[factory article toZoteroCollection: key]
+	on: Error
+	do: [  self exitFailure: 'Error saving article in Zotero collection: ' , key ]
 ]
