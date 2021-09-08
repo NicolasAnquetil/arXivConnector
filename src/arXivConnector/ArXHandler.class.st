@@ -2,13 +2,17 @@
 Usage: arXiv <cmd>
 	
 Commands:
+  zotero <file.mbox> [ <collection> ] -- Imports given mbox file into Zotero collection
+  zoteroListCollections -- Print names of all Zotero collections
+  zoteroResetCollections -- Reinitialize cached list of Zotero collections
+
   importMessage <file.mbox> -- Imports given mbox file into DB (outputs a backup of the DB)
   importWithKey <file.mbox> <key> -- Imports given mbox file into DB
-  zotero <file.mbox> [ <collection> ] -- Imports given mbox file into Zotero collection
   listKeywords -- list all indexing key words in the DB
   listArticles -- list all indexed articles in the DB
   searchKeyword <keyword> -- search articles indexed with a given keyword
   cleanBackups -- keep only the last 5 backup files
+
   help -- prints this message
 
 "
@@ -79,16 +83,13 @@ ArXHandler >> countArticles [
 ]
 
 { #category : #'private - utilities' }
-ArXHandler >> getCollection [
-	(self arguments size > 2)
-	ifTrue: [ ^ ' ' join: (self arguments allButFirst: 2) ].
-
-	^[self getCollectionFromZotero]
-	on: Exception
-	do: [ :except |
-		self exitFailure: except messageText
-	]
-
+ArXHandler >> extractArticleFromFile: filename [
+	| file |
+	file := self getMboxFile: filename.
+	file
+		ifNil:
+			[ self exitFailure: 'Could not process file: ' , filename ].
+	self parseMessage: file
 ]
 
 { #category : #helpers }
@@ -108,6 +109,19 @@ ArXHandler >> getMboxFile: filename [
 	file := filename asFileReference.
 	file exists ifFalse: [ ^ false ].
 	^file
+
+]
+
+{ #category : #'private - utilities' }
+ArXHandler >> getTargetCollection [
+	(self arguments size > 2)
+	ifTrue: [ ^ ' ' join: (self arguments allButFirst: 2) ].
+
+	^[self getCollectionFromZotero]
+	on: Exception
+	do: [ :except |
+		self exitFailure: except messageText
+	]
 
 ]
 
@@ -154,6 +168,16 @@ ArXHandler >> index: article at: keywords [
 ArXHandler >> initialize [
 	super initialize.
 	factory := ArXArticleFactory new
+]
+
+{ #category : #helpers }
+ArXHandler >> initializeZoteroCollections [
+	[ PharoteroServer instance
+		rmodIdentity;
+		reloadCollections ]
+		on: Error
+		do:
+			[ self zoteroResetCollections ]
 ]
 
 { #category : #helpers }
@@ -225,7 +249,7 @@ ArXHandler >> merge [
 	self saveDB 
 ]
 
-{ #category : #activation }
+{ #category : #'private - utilities' }
 ArXHandler >> nbArticlesFound: nb [
 	self stdout
 		nextPutAll: nb asString ;
@@ -331,32 +355,46 @@ ArXHandler >> secondaryBackup [
 	^self backupFilename asFileReference nextVersion
 ]
 
+{ #category : #helpers }
+ArXHandler >> storeArticleInZotero: anArXArticle [
+	| key |
+	self initializeZoteroCollections.
+	key := self getTargetCollection.
+	[ anArXArticle toZoteroCollection: key ]
+		on: Error
+		do: [ self
+				exitFailure: 'Error saving article in Zotero collection: ' , key ]
+]
+
 { #category : #activation }
 ArXHandler >> zotero [
-	| key file |
+	self arguments size < 2
+		ifTrue: [ self
+				exitFailure: 'zotero requires at least 1 argument: <file.mbox> [ <collection> ]' ].
 
-	(self arguments size < 2)
-	ifTrue: [ 
-		self exitFailure: 'zotero requires at least 1 argument: <file.mbox> [ <collection> ]'	].
+	self extractArticleFromFile: self arguments second.
 
-	file := self getMboxFile: (self arguments second).
-	file ifNil: [ self exitFailure: 'Could not process file: ' , self arguments second].
-	self parseMessage: file.
+	self storeArticleInZotero: factory article
+]
 
-	[PharoteroServer instance rmodIdentity ; reloadCollections]
-	on: Error
-	do: [ (PharoteroServer instance
-			rmodIdentity ;
-			resetCollections ;
-			allCollections ) 
+{ #category : #activation }
+ArXHandler >> zoteroListCollections [
+	self initializeZoteroCollections.
+	(PharoteroServer instance topCollections collect: #name)
+		sorted
+			do: [ :each |
+				self stdout
+					nextPutAll: each ;
+					nextPut: Character cr
+			]
+]
+
+{ #category : #activation }
+ArXHandler >> zoteroResetCollections [
+	(PharoteroServer instance
+		rmodIdentity;
+		resetCollections;
+		allCollections)
 		ifEmpty: [ self exitFailure: 'Error loading Zotero collections' ].
-		PharoteroServer instance
-			saveCollections ].
-
-
-	key := self getCollection.
-
-	[factory article toZoteroCollection: key]
-	on: Error
-	do: [  self exitFailure: 'Error saving article in Zotero collection: ' , key ]
+	^ PharoteroServer instance saveCollections
 ]
