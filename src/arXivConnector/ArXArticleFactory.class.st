@@ -55,15 +55,20 @@ ArXArticleFactory >> getAbstract [
 	 and ends with the body"
 	| startLine |
 	startLine := self lineFor: [ :l | l beginsWith: 'Authors:'] fromLine: self bodyStart toLine: self bodyEnd.
+	startLine > 0 ifFalse: [ ^'' ].
+	
 	startLine := self lineFor: [ :l | l isEmpty ] fromLine: startLine toLine: self bodyEnd.
-	^ String cr join: (lines copyFrom: startLine+1 to: self bodyEnd-1).
+	
+	startLine > 0 ifFalse: [ ^'' ].
+	(startLine < self bodyEnd) ifFalse: [ ^'' ].
+	^String cr join: (lines copyFrom: startLine+1 to: self bodyEnd-1)
 ]
 
 { #category : #factory }
 ArXArticleFactory >> getAuthors [
-	"authors can be multiline, ended by next field: Categories"
+	"authors can be multiline, ended by next field: 'Categories:' or 'Current categories:' "
 
-	^ self getMultilineField: 'Authors:' endedBy: 'Categories:'
+	^ self getMultilineField: 'Authors:' endedBy: 'C*ategories:'
 ]
 
 { #category : #factory }
@@ -120,7 +125,7 @@ ArXArticleFactory >> getMultilineField: startString endedBy: endString [
 		fromLine: self bodyStart
 		toLine: self bodyEnd.
 	endLine := self
-		lineFor: [ :l | l beginsWith: endString ]
+		lineFor: [ :l | (endString , '*') match: l ]
 		fromLine: startLine
 		toLine: self bodyEnd.
 	^ self
@@ -131,12 +136,19 @@ ArXArticleFactory >> getMultilineField: startString endedBy: endString [
 { #category : #factory }
 ArXArticleFactory >> getTitle [
 	"title can be multiline, ended by next field: Authors"
-	^ self getMultilineField: 'Title:' endedBy:'Authors:'
+	^ self getMultilineField: 'Title:' endedBy: 'Authors:'
 ]
 
 { #category : #factory }
 ArXArticleFactory >> getURL [
-	^self getField: 'View the submission at'
+	| urlLine |
+	urlLine := self lineFor: [ :l | self urlMarker match: l ] fromLine: self bodyStart toLine: self bodyEnd.
+	^urlLine = 0
+		ifTrue: [ KeyNotFound signal ]
+		ifFalse: [ | line urlStart |
+			line := lines at: urlLine.
+			urlStart := line indexOfSubCollection:  'https://'.
+			line copyFrom: urlStart to: line size. ]
 ]
 
 { #category : #'private-parsing' }
@@ -208,7 +220,7 @@ ArXArticleFactory >> setMessageBounds [
 	] on: KeyNotFound
 	do: [ | i |
 		i := self
-			lineFor: [ :l | l beginsWith: 'View the submission at http://arxiv.org']
+			lineFor: [ :l | self urlMarker match: l ]
 			fromLine: 1
 			toLine: lines size.
 		bounds
@@ -217,4 +229,9 @@ ArXArticleFactory >> setMessageBounds [
 			add: lines size ;
 			add: lines size
 		]
+]
+
+{ #category : #'private-parsing' }
+ArXArticleFactory >> urlMarker [
+	^'View*: https://*arxiv.org/*'
 ]
