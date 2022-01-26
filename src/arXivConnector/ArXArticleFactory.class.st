@@ -214,6 +214,7 @@ ArXArticleFactory >> setMessageBounds [
 	"set the line bounds of the main message and optional note message"
 	| bound |
 	bounds := OrderedCollection new: 4.
+	"{unused . bodyStart . bodyEnd . noteEnd}"
 	[
 		bound := self mimeBound.
 		lines withIndexDo: [ :l :i | (l includesSubstring: bound) ifTrue: [ bounds add: i ]]
@@ -225,7 +226,7 @@ ArXArticleFactory >> setMessageBounds [
 			toLine: lines size.
 		bounds
 			add: 0 ;  "actually not used"
-			add: i ;
+			add: (i max: 1) ;
 			add: lines size ;
 			add: lines size
 		]
