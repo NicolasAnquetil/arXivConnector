@@ -44,9 +44,9 @@ ArXArticleFactory >> content: aMessage [
 	
 	self setMessageBounds.
 
-	self setTitle.
+	"self setTitle.
 	self setAuthors.
-	self setAbstract.
+	self setAbstract."
 ]
 
 { #category : #factory }

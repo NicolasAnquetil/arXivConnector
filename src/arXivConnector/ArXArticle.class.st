@@ -21,6 +21,25 @@ ArXArticle >> abstract: anObject [
 	abstract := anObject
 ]
 
+{ #category : #converting }
+ArXArticle >> asCitezen [
+
+	| czEntry |
+	
+	czEntry := CZEntry type: CZEntry techreport.
+	
+	czEntry key: self czKey.
+	czEntry at: #title put: self title.
+	czEntry at: #url put: self url.
+	czEntry at: #author put: self authorsCleaned.
+	czEntry at: #abstract put: self abstract.
+	czEntry at: #note put: (self comment ifNil: [CZString with: '']).
+	czEntry at: #keywords put: (self comment ifNil: [CZString with: '']).
+
+	^czEntry
+	
+]
+
 { #category : #activation }
 ArXArticle >> asPharoteroItem [
 	^PharoteroItem new
@@ -42,6 +61,20 @@ ArXArticle >> authors: anObject [
 	authors := anObject
 ]
 
+{ #category : #converting }
+ArXArticle >> authorsCleaned [
+
+	^String streamContents: [ :stream |
+		authors do: [ :c |
+			(c = $,)
+			ifTrue: [ stream << ' and ' ]
+			ifFalse: [
+				(c = $;)
+				ifTrue: [ stream << ' and ' ]
+				ifFalse: [ stream << c ] ] ]
+	]
+]
+
 { #category : #accessing }
 ArXArticle >> comment [
 	^ comment
@@ -50,6 +83,21 @@ ArXArticle >> comment [
 { #category : #accessing }
 ArXArticle >> comment: anObject [
 	comment := anObject
+]
+
+{ #category : #converting }
+ArXArticle >> czKey [
+
+	| arXivNumber |
+	arXivNumber := ($/ split: self url) last.
+
+	^('arxiv' , arXivNumber) asSymbol
+]
+
+{ #category : #initialization }
+ArXArticle >> initialize [
+
+	super initialize.
 ]
 
 { #category : #printing }

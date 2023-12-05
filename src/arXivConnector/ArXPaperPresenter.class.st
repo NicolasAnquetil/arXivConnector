@@ -11,15 +11,6 @@ Class {
 	#category : #'arXivConnector-core'
 }
 
-{ #category : #accessing }
-ArXPaperPresenter >> article: arXArticle [
-	article := arXArticle.
-	txtTitle    text: arXArticle title.
-	txtAuthors  text: arXArticle authors.
-	txtAbstract text: arXArticle abstract.
-
-]
-
 { #category : #initialization }
 ArXPaperPresenter >> clearForm [
 	txtAbstract text: ''.
@@ -45,6 +36,15 @@ ArXPaperPresenter >> initializePresenters [
 	txtTitle    := self newText enabled: false ; yourself.
 	txtAuthors  := self newText enabled: false ; yourself.
 	txtAbstract := self newText enabled: false ; yourself.
+
+]
+
+{ #category : #accessing }
+ArXPaperPresenter >> on: arXArticle [
+	article := arXArticle.
+	txtTitle    text: arXArticle title.
+	txtAuthors  text: arXArticle authors.
+	txtAbstract text: arXArticle abstract.
 
 ]
 

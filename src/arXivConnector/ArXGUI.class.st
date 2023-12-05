@@ -36,7 +36,7 @@ ArXGUI >> article: arXArticle [
 
 	article := arXArticle.
 	lstOwners items: (db keysOwningArticle: arXArticle).
-	wdwArticle article: arXArticle
+	wdwArticle on: arXArticle
 ]
 
 { #category : #initialization }

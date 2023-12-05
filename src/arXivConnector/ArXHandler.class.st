@@ -62,6 +62,31 @@ ArXHandler >> articles [
 	^articles
 ]
 
+{ #category : #converting }
+ArXHandler >> asCitezen [
+
+	| czSet |
+	czSet := CZSet new.
+
+	articles keysAndValuesDo: [ :k :v |
+		v do: [ :article || czArticle czKey keywords |
+			czKey := article czKey.
+			czArticle := czSet
+				entryAt: czKey
+				ifAbsent: [ | newEntry |
+					newEntry := article asCitezen.
+					czSet addEntry: newEntry.
+					newEntry
+				].
+			keywords := czArticle at: #keywords.
+			keywords := keywords value , String space , k.
+			czArticle at: #keywords put: keywords.
+		]
+	].
+
+	^czSet 
+]
+
 { #category : #accessing }
 ArXHandler >> backupFilename [
 	^self backupFilename: 0
@@ -90,6 +115,18 @@ ArXHandler >> extractArticleFromFile: filename [
 		ifNil:
 			[ self exitFailure: 'Could not process file: ' , filename ].
 	self parseMessage: file
+]
+
+{ #category : #accessing }
+ArXHandler >> factory [
+
+	^ factory
+]
+
+{ #category : #accessing }
+ArXHandler >> factory: anObject [
+
+	factory := anObject
 ]
 
 { #category : #helpers }
