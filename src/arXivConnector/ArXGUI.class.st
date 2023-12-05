@@ -36,7 +36,7 @@ ArXGUI >> article: arXArticle [
 
 	article := arXArticle.
 	lstOwners items: (db keysOwningArticle: arXArticle).
-	wdwArticle on: arXArticle
+	wdwArticle on: arXArticle asCitezen
 ]
 
 { #category : #initialization }
@@ -100,6 +100,13 @@ ArXGUI >> db: arXDB [
 	lstKeywords items: arXDB allKeys
 ]
 
+{ #category : #initialization }
+ArXGUI >> defaultDB [ 
+
+	self db: ArXHandler new reloadDB.
+
+]
+
 { #category : #layout }
 ArXGUI >> defaultLayout [
 
@@ -116,13 +123,6 @@ ArXGUI >> defaultLayout [
 			yourself) ;
 		add: #wdwArticle ;
 		yourself
-]
-
-{ #category : #initialization }
-ArXGUI >> initialize [ 
-	super initialize.
-	self db: ArXHandler new reloadDB.
-
 ]
 
 { #category : #initialization }
@@ -153,7 +153,8 @@ ArXGUI >> initializePresenters [
 			yourself) ;
 			yourself.
 
-	wdwArticle := self instantiate: ArXPaperPresenter.
+	"wdwArticle := self instantiate: ArXPaperPresenter."
+	wdwArticle := self instantiate: CZEntryPresenter
 ]
 
 { #category : #accessing }

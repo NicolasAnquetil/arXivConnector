@@ -11,6 +11,12 @@ Class {
 	#category : #'arXivConnector-core'
 }
 
+{ #category : #'as yet unclassified' }
+ArXArticle class >> presenterClass [
+
+	^ArXPaperPresenter 
+]
+
 { #category : #accessing }
 ArXArticle >> abstract [
 	^ abstract
