@@ -5,13 +5,10 @@ Class {
 		'lstKeywords',
 		'lstTitles',
 		'lstOwners',
-		'txtTitle',
-		'txtAuthors',
-		'txtAbstract',
-		'key',
 		'article',
 		'db',
-		'btnBar'
+		'btnBar',
+		'wdwArticle'
 	],
 	#category : #'arXivConnector-core'
 }
@@ -36,11 +33,10 @@ ArXGUI class >> defaultSpec [
 
 { #category : #accessing }
 ArXGUI >> article: arXArticle [
+
 	article := arXArticle.
-	txtTitle    text: arXArticle title.
-	txtAuthors  text: arXArticle authors.
-	txtAbstract text: arXArticle abstract.
-	lstOwners items: (db keysOwningArticle: arXArticle) 
+	lstOwners items: (db keysOwningArticle: arXArticle).
+	wdwArticle article: arXArticle
 ]
 
 { #category : #initialization }
@@ -63,10 +59,8 @@ ArXGUI >> clearAll [
 
 { #category : #initialization }
 ArXGUI >> clearForm [
-	txtAbstract text: ''.
-	txtAuthors text: ''.
-	txtTitle text: ''.
-	article := nil
+
+	wdwArticle clearForm
 ]
 
 { #category : #initialization }
@@ -106,6 +100,24 @@ ArXGUI >> db: arXDB [
 	lstKeywords items: arXDB allKeys
 ]
 
+{ #category : #layout }
+ArXGUI >> defaultLayout [
+
+	^SpBoxLayout newHorizontal
+		add: (SpBoxLayout newVertical
+			add: 'Keywords' expand: false ;
+			add: #lstKeywords ;
+			yourself) ;
+		add: (SpBoxLayout newVertical
+			add: 'Keyword papers' expand: false ;
+			add: #lstTitles ;
+			add: 'Paper keywords' expand: false ;
+			add: #lstOwners ;
+			yourself) ;
+		add: #wdwArticle ;
+		yourself
+]
+
 { #category : #initialization }
 ArXGUI >> initialize [ 
 	super initialize.
@@ -128,10 +140,6 @@ ArXGUI >> initializePresenters [
 		display: [ :keyAndArticles | keyAndArticles key ] ;
 		yourself.
 
-	txtTitle    := self newText enabled: false ; yourself.
-	txtAuthors  := self newText enabled: false ; yourself.
-	txtAbstract := self newText enabled: false ; yourself.
-	
 	btnBar := self newActionBar
 		add: (self newButton
 			label: 'Zotero'; 
@@ -144,6 +152,8 @@ ArXGUI >> initializePresenters [
 			action: [ article inspect ];
 			yourself) ;
 			yourself.
+
+	wdwArticle := self instantiate: ArXPaperPresenter.
 ]
 
 { #category : #accessing }
@@ -160,19 +170,4 @@ ArXGUI >> lstTitles [
 ArXGUI >> selectKey: keyAndArticles andArticle: anArticle [
 	lstKeywords clickAtIndex: (lstKeywords items indexOf: keyAndArticles).
 	lstTitles clickAtIndex: (lstTitles items indexOf: anArticle)
-]
-
-{ #category : #accessing }
-ArXGUI >> txtAbstract [
-	^ txtAbstract
-]
-
-{ #category : #accessing }
-ArXGUI >> txtAuthors [
-	^ txtAuthors
-]
-
-{ #category : #accessing }
-ArXGUI >> txtTitle [
-	^ txtTitle
 ]
