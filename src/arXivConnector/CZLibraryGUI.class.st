@@ -14,7 +14,8 @@ Class {
 		'btnBar',
 		'wdwArticle',
 		'pstrArticles',
-		'keywords'
+		'keywords',
+		'lblKeywords'
 	],
 	#category : #'arXivConnector-core'
 }
@@ -83,19 +84,6 @@ CZLibraryGUI >> clearForm [
 	wdwArticle clearForm
 ]
 
-{ #category : #'instance creation' }
-CZLibraryGUI >> computeKeywords [
-
-	keywords := Dictionary new.
-
-	db do: [ :czArticle |
-		(self articleKeywords: czArticle) do: [ :keywrd || kwMembers |
-			kwMembers := keywords at: keywrd ifAbsentPut: [ OrderedCollection new ].
-			kwMembers add: czArticle
-		]
-	]
-]
-
 { #category : #initialization }
 CZLibraryGUI >> connectPresenters [
 	super connectPresenters.
@@ -108,8 +96,8 @@ CZLibraryGUI >> connectPresenters [
 
 	lstOwners  whenSelectionChangedDo: [ :selection |
 		selection selectedItem
-			ifNotNil: [ :keyAndArticles | 
-				self selectKey: keyAndArticles andArticle: article ]
+			ifNotNil: [ :key | 
+				self selectKey: key andArticle: article ]
 	].
 ]
 
@@ -125,7 +113,7 @@ CZLibraryGUI >> defaultLayout [
 
 	^SpBoxLayout newHorizontal
 		add: (SpBoxLayout newVertical
-			add: 'Keywords' expand: false ;
+			add: #lblKeywords expand: false ;
 			add: #lstKeywords ;
 			yourself) ;
 		add: (SpBoxLayout newVertical
@@ -140,9 +128,13 @@ CZLibraryGUI >> defaultLayout [
 
 { #category : #initialization }
 CZLibraryGUI >> initializePresenters [
+	lblKeywords := self newLabel
+		label: 'Keywords: 0' ;
+		yourself.
 	lstKeywords := self newList
 		beSingleSelection ;
 		display: [ :keyAndArticles | keyAndArticles key , ': ' , keyAndArticles value size asString ] ;
+		sortingBlock: [:a :b | a key < b key ] ;
 		yourself.
 
 	pstrArticles   := self instantiate: CZEntryListPresenter.
@@ -200,9 +192,7 @@ CZLibraryGUI >> myBibFileName [
 { #category : #'instance creation' }
 CZLibraryGUI >> on: articles [ 
 	db := articles.
-	self computeKeywords.
-
-	lstKeywords items: (keywords associations)
+	self updateKeywordsList.
 
 ]
 
@@ -229,8 +219,11 @@ CZLibraryGUI >> rmodBibFileName [
 ]
 
 { #category : #interaction }
-CZLibraryGUI >> selectKey: keyAndArticles andArticle: anArticle [
-	lstKeywords clickAtIndex: (lstKeywords items indexOf: keyAndArticles).
+CZLibraryGUI >> selectKey: key andArticle: anArticle [
+	lstKeywords
+		selectIndex: (lstKeywords items findFirst: [ :kwItem | kwItem key = key])
+		scrollToSelection: true.
+
 	pstrArticles selectArticle: anArticle
 ]
 
@@ -241,4 +234,21 @@ CZLibraryGUI >> showArticle: anArticle [
 
 	lstOwners items: (self articleKeywords: anArticle).
 	wdwArticle on: anArticle
+]
+
+{ #category : #'instance creation' }
+CZLibraryGUI >> updateKeywordsList [
+
+	keywords := Dictionary new.
+
+	db do: [ :czArticle |
+		(self articleKeywords: czArticle) do: [ :keywrd || kwMembers |
+			kwMembers := keywords at: keywrd ifAbsentPut: [ OrderedCollection new ].
+			kwMembers add: czArticle
+		]
+	].
+
+	lstKeywords items: (keywords associations).
+	lblKeywords label: 'Keywords: ' , (lstKeywords items size asString)
+
 ]
