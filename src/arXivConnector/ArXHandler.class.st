@@ -51,6 +51,26 @@ ArXHandler >> activate [
 	self exitSuccess 
 ]
 
+{ #category : #converting }
+ArXHandler >> add: k toKeywords: czArticle [
+
+	| keywords |
+	'' writeStreamDo: [ :st |
+		st
+			<< (czArticle at: #keywords) value ;
+			space.
+		k do: [ :c |
+			(c = Character space)
+			ifTrue: [ st << $- ]
+			ifFalse: [  st << c ]
+		].
+	
+		keywords := st contents
+	].
+
+	czArticle at: #keywords put: keywords
+]
+
 { #category : #helpers }
 ArXHandler >> allKeys [
 	^(self articles associations
@@ -69,22 +89,19 @@ ArXHandler >> asCitezen [
 	czSet := CZSet new.
 
 	articles keysAndValuesDo: [ :k :v |
-		v do: [ :article || czArticle czKey keywords |
+		v do: [ :article |
+			| czArticle czKey |
 			czKey := article czKey.
-			czArticle := czSet
-				entryAt: czKey
-				ifAbsent: [ | newEntry |
-					newEntry := article asCitezen.
-					czSet addEntry: newEntry.
-					newEntry
-				].
-			keywords := czArticle at: #keywords.
-			keywords := keywords value , String space , k.
-			czArticle at: #keywords put: keywords.
+			czArticle := czSet entryAt: czKey ifAbsent: [
+				             | newEntry |
+				             newEntry := article asCitezen.
+				             czSet addEntry: newEntry.
+				             newEntry ].
+			self add: k toKeywords: czArticle
 		]
 	].
 
-	^czSet 
+	^ czSet
 ]
 
 { #category : #accessing }

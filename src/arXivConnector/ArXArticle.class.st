@@ -39,8 +39,8 @@ ArXArticle >> asCitezen [
 	czEntry at: #url put: self url.
 	czEntry at: #author put: self authorsCleaned.
 	czEntry at: #abstract put: self abstract.
-	czEntry at: #note put: (self comment ifNil: [CZString with: '']).
-	czEntry at: #keywords put: (self comment ifNil: [CZString with: '']).
+	czEntry at: #note put: (self comment ifNil: ['']).
+	czEntry at: #keywords put: (self comment ifNil: ['']).
 
 	^czEntry
 	
