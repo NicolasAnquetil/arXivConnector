@@ -10,12 +10,11 @@ Class {
 		'lstKeywords',
 		'lstOwners',
 		'article',
-		'db',
-		'btnBar',
 		'wdwArticle',
 		'pstrArticles',
 		'keywords',
-		'lblKeywords'
+		'lblKeywords',
+		'model'
 	],
 	#category : #'arXivConnector-core'
 }
@@ -32,17 +31,7 @@ CZLibraryGUI class >> myBib [
 CZLibraryGUI class >> on: aCZBibset [
 
 	^self new
-		on: aCZBibset ;
-		open
-]
-
-{ #category : #'instance creation' }
-CZLibraryGUI class >> onBibFile: bibFileName [
-
-	self
-		on: (bibFileName asFileReference readStreamDo: [ :stream |
-			CZBibParser parse: stream contents ]) ;
-		open
+		on: aCZBibset
 ]
 
 { #category : #'instance creation' }
@@ -51,25 +40,6 @@ CZLibraryGUI class >> rmodBib [
 
 	self new
 		rmodBib
-]
-
-{ #category : #interaction }
-CZLibraryGUI >> articleKeywords: anArticle [
-
-	^ (Character space split: (anArticle at: #keywords) value) reject:
-		  #isEmpty
-]
-
-{ #category : #TOREMOVE }
-CZLibraryGUI >> articleToZotero [
-	article toZoteroCollection: db getCollectionFromZotero.
-	db removeArticle: article.
-	self on: db
-]
-
-{ #category : #accessing }
-CZLibraryGUI >> btnBar [
-	^ btnBar
 ]
 
 { #category : #interaction }
@@ -101,13 +71,6 @@ CZLibraryGUI >> connectPresenters [
 	].
 ]
 
-{ #category : #TOREMOVE }
-CZLibraryGUI >> defaultDB [ 
-
-	self on: ArXHandler new reloadDB.
-
-]
-
 { #category : #layout }
 CZLibraryGUI >> defaultLayout [
 
@@ -127,6 +90,15 @@ CZLibraryGUI >> defaultLayout [
 ]
 
 { #category : #initialization }
+CZLibraryGUI >> initialize [
+
+	super initialize.
+
+	model := CZLibraryModel new.
+	model view: self
+]
+
+{ #category : #initialization }
 CZLibraryGUI >> initializePresenters [
 	lblKeywords := self newLabel
 		label: 'Keywords: 0' ;
@@ -143,19 +115,6 @@ CZLibraryGUI >> initializePresenters [
 	lstOwners   := self newList
 		enabled: false ;
 		yourself.
-
-	btnBar := self newActionBar
-		add: (self newButton
-			label: 'Zotero'; 
-			help: 'to Zotero';
-			action: [ self articleToZotero ];
-			yourself) ;
-		add: (self newButton
-			label: 'Inspect'; 
-			help: 'to Zotero';
-			action: [ article inspect ];
-			yourself) ;
-			yourself.
 
 	"wdwArticle := self instantiate: ArXPaperPresenter."
 	wdwArticle := self instantiate: CZEntryPresenter
@@ -179,43 +138,27 @@ CZLibraryGUI >> lstKeywords [
 { #category : #'instance creation' }
 CZLibraryGUI >> myBib [
 
-	
-	self onBibFile: self myBibFileName 
-]
-
-{ #category : #accessing }
-CZLibraryGUI >> myBibFileName [
-
-	^'/home/anquetil/Documents/RMod/Rech/literature.bib'
+	model myBib
 ]
 
 { #category : #'instance creation' }
-CZLibraryGUI >> on: articles [ 
-	db := articles.
-	self updateKeywordsList.
+CZLibraryGUI >> on: aCollection [
+	model articles: aCollection.
+	model updateKeywordsList.
 
 ]
 
-{ #category : #'instance creation' }
-CZLibraryGUI >> onBibFile: bibFileName [
+{ #category : #interaction }
+CZLibraryGUI >> resetView [
 
-	self
-		on: (bibFileName asFileReference readStreamDo: [ :stream |
-			CZBibParser parse: stream contents ]) ;
-		open
+	lstKeywords items: model keywords associations.
+	lblKeywords label: 'Keywords: ' , lstKeywords items size asString
 ]
 
 { #category : #'instance creation' }
 CZLibraryGUI >> rmodBib [
 
-	
-	self onBibFile: self rmodBibFileName 
-]
-
-{ #category : #accessing }
-CZLibraryGUI >> rmodBibFileName [
-
-	^'/home/anquetil/Documents/RMod/Reports/Bibliography/bib/rmod.bib'
+	model rmodBib
 ]
 
 { #category : #interaction }
@@ -232,23 +175,6 @@ CZLibraryGUI >> showArticle: anArticle [
 
 	article := anArticle.
 
-	lstOwners items: (self articleKeywords: anArticle).
+	lstOwners items: (model articleKeywords: anArticle).
 	wdwArticle on: anArticle
-]
-
-{ #category : #'instance creation' }
-CZLibraryGUI >> updateKeywordsList [
-
-	keywords := Dictionary new.
-
-	db do: [ :czArticle |
-		(self articleKeywords: czArticle) do: [ :keywrd || kwMembers |
-			kwMembers := keywords at: keywrd ifAbsentPut: [ OrderedCollection new ].
-			kwMembers add: czArticle
-		]
-	].
-
-	lstKeywords items: (keywords associations).
-	lblKeywords label: 'Keywords: ' , (lstKeywords items size asString)
-
 ]
