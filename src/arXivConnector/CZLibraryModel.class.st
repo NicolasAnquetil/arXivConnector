@@ -6,7 +6,7 @@ Class {
 		'keywords',
 		'view'
 	],
-	#category : #'arXivConnector-core'
+	#category : #'arXivConnector-model'
 }
 
 { #category : #accessing }
@@ -15,11 +15,12 @@ CZLibraryModel >> addArticles: aCollection [
 	articles addAll: aCollection
 ]
 
-{ #category : #interaction }
+{ #category : #'instance creation' }
 CZLibraryModel >> articleKeywords: anArticle [
 
-	^ (Character space split: (anArticle at: #keywords) value) reject:
-		  #isEmpty
+	^($, split: (anArticle at: #keywords) value)
+		reject: #isEmpty
+		thenCollect: #trimBoth
 ]
 
 { #category : #accessing }
@@ -40,7 +41,7 @@ CZLibraryModel >> initialize [
 	super initialize.
 
 	keywords := Dictionary new.
-	articles := OrderedCollection new
+	articles := CZSet new
 ]
 
 { #category : #accessing }
@@ -64,7 +65,6 @@ CZLibraryModel >> loadBibFile: bibFileName [
 
 { #category : #'instance creation' }
 CZLibraryModel >> myBib [
-
 	
 	self onBibFile: self myBibFileName 
 ]
@@ -78,21 +78,9 @@ CZLibraryModel >> myBibFileName [
 { #category : #'instance creation' }
 CZLibraryModel >> onBibFile: bibFileName [
 
-	self articles: (self loadBibFile: bibFileName).
-	self updateKeywordsList.
-	view open
+	articles addAll: (self loadBibFile: bibFileName).
+	self updateKeywordsList
 
-]
-
-{ #category : #'instance creation' }
-CZLibraryModel >> onBibFile: bibFileName keyWord: aKeyWord [
-	"loads new articles in existing DB and classify them in aKeyWord"
-
-	articles := self loadBibFile: bibFileName.
-
-	self addArticles: articles.
-	(keywords at: aKeyWord ifAbsentPut: [ OrderedCollection new ])
-		addAll: articles
 ]
 
 { #category : #'instance creation' }
@@ -106,6 +94,17 @@ CZLibraryModel >> rmodBib [
 CZLibraryModel >> rmodBibFileName [
 
 	^'/home/anquetil/Documents/RMod/Reports/Bibliography/bib/rmod.bib'
+]
+
+{ #category : #action }
+CZLibraryModel >> saveArticles: czEntries on: aFileReference [
+
+	| renderer |
+	aFileReference writeStreamDo: [ :stream |
+		renderer := BibBibRenderer new.
+		renderer setStream: stream.
+		czEntries do: [ :article | renderer render: article ]
+	]
 ]
 
 { #category : #'instance creation' }

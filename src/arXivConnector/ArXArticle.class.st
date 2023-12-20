@@ -8,7 +8,7 @@ Class {
 		'abstract',
 		'comment'
 	],
-	#category : #'arXivConnector-core'
+	#category : #'arXivConnector-old'
 }
 
 { #category : #'as yet unclassified' }

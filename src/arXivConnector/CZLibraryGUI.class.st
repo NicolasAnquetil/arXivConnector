@@ -11,12 +11,12 @@ Class {
 		'lstOwners',
 		'article',
 		'wdwArticle',
-		'pstrArticles',
 		'keywords',
 		'lblKeywords',
-		'model'
+		'model',
+		'wdwKeywordArticles'
 	],
-	#category : #'arXivConnector-core'
+	#category : #'arXivConnector-gui'
 }
 
 { #category : #'instance creation' }
@@ -44,7 +44,7 @@ CZLibraryGUI class >> rmodBib [
 
 { #category : #interaction }
 CZLibraryGUI >> clearAll [
-	pstrArticles on: (CZSet new).
+	wdwKeywordArticles on: (CZSet new).
 	self clearForm
 ]
 
@@ -61,7 +61,7 @@ CZLibraryGUI >> connectPresenters [
 	lstKeywords whenSelectionChangedDo: [ :selection |
 		selection selectedItem
 			ifNil: [ self clearAll ]
-			ifNotNil: [ :keyAndArticles | pstrArticles onEntries: keyAndArticles value ]
+			ifNotNil: [ :keyAndArticles | wdwKeywordArticles onEntries: keyAndArticles value ]
 	].
 
 	lstOwners  whenSelectionChangedDo: [ :selection |
@@ -69,6 +69,12 @@ CZLibraryGUI >> connectPresenters [
 			ifNotNil: [ :key | 
 				self selectKey: key andArticle: article ]
 	].
+]
+
+{ #category : #accessing }
+CZLibraryGUI >> defaultDirectoryName [
+
+	^'/home/anquetil/Documents/RMod/Rech/'
 ]
 
 { #category : #layout }
@@ -81,7 +87,7 @@ CZLibraryGUI >> defaultLayout [
 			yourself) ;
 		add: (SpBoxLayout newVertical
 			add: 'Keyword papers' expand: false ;
-			add: #pstrArticles ;
+			add: #wdwKeywordArticles ;
 			add: 'Paper keywords' expand: false ;
 			add: #lstOwners ;
 			yourself) ;
@@ -103,21 +109,21 @@ CZLibraryGUI >> initializePresenters [
 	lblKeywords := self newLabel
 		label: 'Keywords: 0' ;
 		yourself.
-	lstKeywords := self newList
-		beSingleSelection ;
+	lstKeywords := (self instantiate: SpFilteringListPresenter)
+		"beSingleSelection ;"
 		display: [ :keyAndArticles | keyAndArticles key , ': ' , keyAndArticles value size asString ] ;
-		sortingBlock: [:a :b | a key < b key ] ;
+		"sortingBlock: [:a :b | a key < b key ] ;"
 		yourself.
 
-	pstrArticles   := self instantiate: CZEntryListPresenter.
-	pstrArticles parentPresenter: self.
+	wdwKeywordArticles := self instantiate: CZEntryListPresenter.
 
 	lstOwners   := self newList
+		sortingBlock: [:a :b | a < b ] ;
 		enabled: false ;
 		yourself.
 
-	"wdwArticle := self instantiate: ArXPaperPresenter."
-	wdwArticle := self instantiate: CZEntryPresenter
+	wdwArticle := self instantiate: CZEntryPresenter.
+
 ]
 
 { #category : #initialization }
@@ -133,6 +139,18 @@ CZLibraryGUI >> initializeWindow: aWindowPresenter [
 { #category : #accessing }
 CZLibraryGUI >> lstKeywords [
 	^ lstKeywords
+]
+
+{ #category : #accessing }
+CZLibraryGUI >> model [
+
+	^ model
+]
+
+{ #category : #accessing }
+CZLibraryGUI >> model: anObject [
+
+	model := anObject
 ]
 
 { #category : #'instance creation' }
@@ -151,7 +169,7 @@ CZLibraryGUI >> on: aCollection [
 { #category : #interaction }
 CZLibraryGUI >> resetView [
 
-	lstKeywords items: model keywords associations.
+	lstKeywords items: (model keywords associations sorted: [:a :b | a key < b key ]).
 	lblKeywords label: 'Keywords: ' , lstKeywords items size asString
 ]
 
@@ -161,13 +179,19 @@ CZLibraryGUI >> rmodBib [
 	model rmodBib
 ]
 
+{ #category : #action }
+CZLibraryGUI >> saveArticles: czEntries on: aFileReference [
+
+	model saveArticles: czEntries on: aFileReference
+]
+
 { #category : #interaction }
 CZLibraryGUI >> selectKey: key andArticle: anArticle [
 	lstKeywords
 		selectIndex: (lstKeywords items findFirst: [ :kwItem | kwItem key = key])
-		scrollToSelection: true.
+		"scrollToSelection: true".
 
-	pstrArticles selectArticle: anArticle
+	wdwKeywordArticles selectArticle: anArticle
 ]
 
 { #category : #interaction }

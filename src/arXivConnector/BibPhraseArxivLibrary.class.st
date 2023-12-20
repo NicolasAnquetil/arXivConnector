@@ -11,7 +11,7 @@ arXivDB := ArXHandler new reloadDB.
 Class {
 	#name : #BibPhraseArxivLibrary,
 	#superclass : #BibPhraseLibrary,
-	#category : #arXivConnector
+	#category : #'arXivConnector-model'
 }
 
 { #category : #'phrases-partial' }
