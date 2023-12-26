@@ -14,7 +14,8 @@ Class {
 		'keywords',
 		'lblKeywords',
 		'model',
-		'wdwKeywordArticles'
+		'wdwKeywordArticles',
+		'toolbar'
 	],
 	#category : #'arXivConnector-gui'
 }
@@ -48,6 +49,12 @@ CZLibraryGUI >> clearAll [
 	self clearForm
 ]
 
+{ #category : #action }
+CZLibraryGUI >> clearArticleList [
+
+	wdwKeywordArticles onEntries: #()
+]
+
 { #category : #interaction }
 CZLibraryGUI >> clearForm [
 
@@ -61,7 +68,7 @@ CZLibraryGUI >> connectPresenters [
 	lstKeywords whenSelectionChangedDo: [ :selection |
 		selection selectedItem
 			ifNil: [ self clearAll ]
-			ifNotNil: [ :keyAndArticles | wdwKeywordArticles onEntries: keyAndArticles value ]
+			ifNotNil: [ :keyAndArticles | model selectedKeyword: keyAndArticles ]
 	].
 
 	lstOwners  whenSelectionChangedDo: [ :selection |
@@ -82,6 +89,7 @@ CZLibraryGUI >> defaultLayout [
 
 	^SpBoxLayout newHorizontal
 		add: (SpBoxLayout newVertical
+			add: #toolbar expand: false ;
 			add: #lblKeywords expand: false ;
 			add: #lstKeywords ;
 			yourself) ;
@@ -100,7 +108,7 @@ CZLibraryGUI >> initialize [
 
 	super initialize.
 
-	model := CZLibraryModel new.
+	self model: CZLibraryModel new.
 	model view: self
 ]
 
@@ -109,13 +117,14 @@ CZLibraryGUI >> initializePresenters [
 	lblKeywords := self newLabel
 		label: 'Keywords: 0' ;
 		yourself.
-	lstKeywords := (self instantiate: SpFilteringListPresenter)
-		"beSingleSelection ;"
-		display: [ :keyAndArticles | keyAndArticles key , ': ' , keyAndArticles value size asString ] ;
-		"sortingBlock: [:a :b | a key < b key ] ;"
-		yourself.
+	lstKeywords := self instantiate: SpFilteringListPresenter.
+	lstKeywords display: [ :keyAndArticles | keyAndArticles key , ': ' , keyAndArticles value size asString ].
+	lstKeywords listPresenter
+		beSingleSelection ;
+		sortingBlock: [:a :b | a key < b key ].
 
 	wdwKeywordArticles := self instantiate: CZEntryListPresenter.
+	wdwKeywordArticles model: self model.
 
 	lstOwners   := self newList
 		sortingBlock: [:a :b | a < b ] ;
@@ -124,6 +133,7 @@ CZLibraryGUI >> initializePresenters [
 
 	wdwArticle := self instantiate: CZEntryPresenter.
 
+	toolbar := self instantiate: CZToolBar.
 ]
 
 { #category : #initialization }
@@ -150,7 +160,8 @@ CZLibraryGUI >> model [
 { #category : #accessing }
 CZLibraryGUI >> model: anObject [
 
-	model := anObject
+	model := anObject.
+	wdwKeywordArticles model: anObject
 ]
 
 { #category : #'instance creation' }
@@ -182,16 +193,24 @@ CZLibraryGUI >> rmodBib [
 { #category : #action }
 CZLibraryGUI >> saveArticles: czEntries on: aFileReference [
 
+	SpConfirmDialog new
+		title: 'Confirm library save';
+		label: 'Are you sure you want to overwrite the library bibfile?';
+		acceptLabel: 'Yes';
+		cancelLabel: 'No';
+		onCancel: [ ^self ];
+		openDialog.
+1halt.
 	model saveArticles: czEntries on: aFileReference
 ]
 
 { #category : #interaction }
 CZLibraryGUI >> selectKey: key andArticle: anArticle [
-	lstKeywords
+	lstKeywords listPresenter
 		selectIndex: (lstKeywords items findFirst: [ :kwItem | kwItem key = key])
-		"scrollToSelection: true".
+		scrollToSelection: true.
 
-	wdwKeywordArticles selectArticle: anArticle
+	anArticle ifNotNil: [ wdwKeywordArticles selectArticle: anArticle ]
 ]
 
 { #category : #interaction }
@@ -201,4 +220,30 @@ CZLibraryGUI >> showArticle: anArticle [
 
 	lstOwners items: (model articleKeywords: anArticle).
 	wdwArticle on: anArticle
+]
+
+{ #category : #action }
+CZLibraryGUI >> showArticles: aCollection [
+
+	wdwKeywordArticles onEntries: aCollection
+]
+
+{ #category : #action }
+CZLibraryGUI >> toolbarNew [
+	"Creating a new key word"
+
+	| kw |
+	kw := SpRequestDialog new
+		title: 'New keyword' ;
+		acceptLabel: 'OK' ;
+		openModal.
+
+	kw ifNil: [ ^self ].
+	model addKeyword: kw.
+]
+
+{ #category : #action }
+CZLibraryGUI >> toolbarSave [
+
+	model saveArticles
 ]

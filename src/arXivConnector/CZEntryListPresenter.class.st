@@ -6,6 +6,7 @@ Class {
 		'lblEntries',
 		'checkEntryIcon',
 		'checkEntryBlock',
+		'model',
 		'toolbar'
 	],
 	#category : #'arXivConnector-gui'
@@ -89,6 +90,18 @@ CZEntryListPresenter >> initializePresenters [
 	toolbar := self instantiate: CZToolBar
 ]
 
+{ #category : #accessing }
+CZEntryListPresenter >> model [
+
+	^ model
+]
+
+{ #category : #accessing }
+CZEntryListPresenter >> model: anObject [
+
+	model := anObject
+]
+
 { #category : #'instance creation' }
 CZEntryListPresenter >> on: aBibset [
 
@@ -119,6 +132,12 @@ CZEntryListPresenter >> showEntry: selection [
 
 { #category : #action }
 CZEntryListPresenter >> toolbarInspect [
+]
+
+{ #category : #action }
+CZEntryListPresenter >> toolbarNew [
+	
+	model createArticle
 ]
 
 { #category : #action }

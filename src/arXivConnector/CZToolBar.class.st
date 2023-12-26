@@ -3,7 +3,8 @@ Class {
 	#superclass : #SpPresenter,
 	#instVars : [
 		'btnSave',
-		'btnInspect'
+		'btnInspect',
+		'btnNew'
 	],
 	#category : #'arXivConnector-gui'
 }
@@ -12,6 +13,7 @@ Class {
 CZToolBar >> defaultLayout [
 
 	^SpBoxLayout newLeftToRight
+		add: btnNew expand: false ;
 		add: btnSave expand: false ;
 		add: btnInspect expand: false ;
 		yourself
@@ -21,13 +23,21 @@ CZToolBar >> defaultLayout [
 CZToolBar >> initializePresenters [ 
 	super initializePresenters.
 
-	btnSave    := self newButton
+	btnNew  := self newButton
+		icon: (self iconNamed: #smallNew) ;
+		help: 'New item' ;
+		action: [ owner toolbarNew ] ;
+		yourself.
+
+	btnSave := self newButton
 		icon: (self iconNamed: #smallSave) ;
+		help: 'Save' ;
 		action: [ owner toolbarSave ] ;
 		yourself.
 
 	btnInspect := self newButton
 		icon: (self iconNamed: #smallInspectIt) ;
+		help: 'Inspect' ;
 		action: [ owner toolbarInspect ] ;
 		yourself
 ]
