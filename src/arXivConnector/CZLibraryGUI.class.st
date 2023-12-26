@@ -125,8 +125,9 @@ CZLibraryGUI >> initializePresenters [
 
 	wdwKeywordArticles := self instantiate: CZEntryListPresenter.
 	wdwKeywordArticles model: self model.
+	wdwKeywordArticles checkEntryBlock: [ :entry | model articleHasNote: entry ].
 
-	lstOwners   := self newList
+	lstOwners := self newList
 		sortingBlock: [:a :b | a < b ] ;
 		enabled: false ;
 		yourself.

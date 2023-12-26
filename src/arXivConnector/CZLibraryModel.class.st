@@ -33,6 +33,16 @@ CZLibraryModel >> addKeyword: aString [
 	view selectKey: aString andArticle: nil
 ]
 
+{ #category : #'as yet unclassified' }
+CZLibraryModel >> articleHasNote: article [
+
+	(article at: #note) isUndefined ifTrue: [ ^false ].
+
+	(article at: #note) value ifEmpty: [ ^false ].
+
+	^true
+]
+
 { #category : #'instance creation' }
 CZLibraryModel >> articleKeywords: anArticle [
 

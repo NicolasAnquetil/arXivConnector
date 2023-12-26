@@ -139,9 +139,7 @@ CZEntryPresenter >> on: aCZEntry [
 	txtAbstract text: (aCZEntry at: #abstract) value asString.
 	txtKind    text: (aCZEntry type) asString.
 	txtUrl     text: (aCZEntry at: #url) value asString.
-
-	txtNote    text: ((aCZEntry at: #note) value asString
-		ifEmpty: [ self defaultNoteStructure ]).
+	txtNote    text: (aCZEntry at: #note) value asString
 ]
 
 { #category : #accessing }
@@ -154,6 +152,12 @@ CZEntryPresenter >> toolbarHeight [
 CZEntryPresenter >> toolbarInspect [
 
 	czEntry inspect
+]
+
+{ #category : #action }
+CZEntryPresenter >> toolbarNew [
+
+	txtNote text: self defaultNoteStructure
 ]
 
 { #category : #action }
