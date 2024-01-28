@@ -200,10 +200,10 @@ CZLibraryModel >> rmodBibFileName [
 CZLibraryModel >> saveArticles [
 
 	| bibReferenceFile |
-1halt.
+
 	bibReferenceFile := bibFile asFileReference.
 	bibReferenceFile exists
-		ifTrue: [ self backupFile: bibReferenceFile  ].
+		ifTrue: [ self backupFile: bibReferenceFile copy  ].
 	self saveArticles: articles on: bibReferenceFile
 ]
 
