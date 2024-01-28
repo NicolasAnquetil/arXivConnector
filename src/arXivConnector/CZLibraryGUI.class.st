@@ -7,15 +7,10 @@ Class {
 	#name : #CZLibraryGUI,
 	#superclass : #SpPresenter,
 	#instVars : [
-		'lstKeywords',
-		'lstOwners',
-		'article',
 		'wdwArticle',
-		'keywords',
-		'lblKeywords',
 		'model',
-		'wdwKeywordArticles',
-		'toolbar'
+		'lstKeywords',
+		'lstPapers'
 	],
 	#category : #'arXivConnector-gui'
 }
@@ -44,38 +39,9 @@ CZLibraryGUI class >> rmodBib [
 ]
 
 { #category : #interaction }
-CZLibraryGUI >> clearAll [
-	wdwKeywordArticles on: (CZSet new).
-	self clearForm
-]
-
-{ #category : #action }
 CZLibraryGUI >> clearArticleList [
 
-	wdwKeywordArticles onEntries: #()
-]
-
-{ #category : #interaction }
-CZLibraryGUI >> clearForm [
-
-	wdwArticle clearForm
-]
-
-{ #category : #initialization }
-CZLibraryGUI >> connectPresenters [
-	super connectPresenters.
-
-	lstKeywords whenSelectionChangedDo: [ :selection |
-		selection selectedItem
-			ifNil: [ self clearAll ]
-			ifNotNil: [ :keyAndArticles | model selectedKeyword: keyAndArticles ]
-	].
-
-	lstOwners  whenSelectionChangedDo: [ :selection |
-		selection selectedItem
-			ifNotNil: [ :key | 
-				self selectKey: key andArticle: article ]
-	].
+	lstPapers reset
 ]
 
 { #category : #accessing }
@@ -88,19 +54,16 @@ CZLibraryGUI >> defaultDirectoryName [
 CZLibraryGUI >> defaultLayout [
 
 	^SpBoxLayout newHorizontal
-		add: (SpBoxLayout newVertical
-			add: #toolbar expand: false ;
-			add: #lblKeywords expand: false ;
-			add: #lstKeywords ;
-			yourself) ;
-		add: (SpBoxLayout newVertical
-			add: 'Keyword papers' expand: false ;
-			add: #wdwKeywordArticles ;
-			add: 'Paper keywords' expand: false ;
-			add: #lstOwners ;
-			yourself) ;
-		add: #wdwArticle ;
+		add: lstKeywords ;
+		add: lstPapers ;
+		add: wdwArticle ;
 		yourself
+]
+
+{ #category : #interaction }
+CZLibraryGUI >> deleteAction [
+
+	self shouldBeImplemented 
 ]
 
 { #category : #initialization }
@@ -114,27 +77,12 @@ CZLibraryGUI >> initialize [
 
 { #category : #initialization }
 CZLibraryGUI >> initializePresenters [
-	lblKeywords := self newLabel
-		label: 'Keywords: 0' ;
-		yourself.
-	lstKeywords := self instantiate: SpFilteringListPresenter.
-	lstKeywords display: [ :keyAndArticles | keyAndArticles key , ': ' , keyAndArticles value size asString ].
-	lstKeywords listPresenter
-		beSingleSelection ;
-		sortingBlock: [:a :b | a key < b key ].
 
-	wdwKeywordArticles := self instantiate: CZEntryListPresenter.
-	wdwKeywordArticles model: self model.
-	wdwKeywordArticles checkEntryBlock: [ :entry | model articleHasNote: entry ].
+	super initializePresenters.
 
-	lstOwners := self newList
-		sortingBlock: [:a :b | a < b ] ;
-		enabled: false ;
-		yourself.
-
-	wdwArticle := self instantiate: CZEntryPresenter.
-
-	toolbar := self instantiate: CZToolBar.
+	lstKeywords := self instantiate: CZKeywordListPresenter.
+	lstPapers := self instantiate: CZPaperListPresenter.
+	wdwArticle := self instantiate: CZEntryPresenter
 ]
 
 { #category : #initialization }
@@ -148,8 +96,10 @@ CZLibraryGUI >> initializeWindow: aWindowPresenter [
 ]
 
 { #category : #accessing }
-CZLibraryGUI >> lstKeywords [
-	^ lstKeywords
+CZLibraryGUI >> keywordList [
+
+	^self model keywords associations
+
 ]
 
 { #category : #accessing }
@@ -161,8 +111,7 @@ CZLibraryGUI >> model [
 { #category : #accessing }
 CZLibraryGUI >> model: anObject [
 
-	model := anObject.
-	wdwKeywordArticles model: anObject
+	model := anObject
 ]
 
 { #category : #'instance creation' }
@@ -171,66 +120,8 @@ CZLibraryGUI >> myBib [
 	model myBib
 ]
 
-{ #category : #'instance creation' }
-CZLibraryGUI >> on: aCollection [
-	model articles: aCollection.
-	model updateKeywordsList.
-
-]
-
 { #category : #interaction }
-CZLibraryGUI >> resetView [
-
-	lstKeywords items: (model keywords associations sorted: [:a :b | a key < b key ]).
-	lblKeywords label: 'Keywords: ' , lstKeywords items size asString
-]
-
-{ #category : #'instance creation' }
-CZLibraryGUI >> rmodBib [
-
-	model rmodBib
-]
-
-{ #category : #action }
-CZLibraryGUI >> saveArticles: czEntries on: aFileReference [
-
-	SpConfirmDialog new
-		title: 'Confirm library save';
-		label: 'Are you sure you want to overwrite the library bibfile?';
-		acceptLabel: 'Yes';
-		cancelLabel: 'No';
-		onCancel: [ ^self ];
-		openDialog.
-1halt.
-	model saveArticles: czEntries on: aFileReference
-]
-
-{ #category : #interaction }
-CZLibraryGUI >> selectKey: key andArticle: anArticle [
-	lstKeywords listPresenter
-		selectIndex: (lstKeywords items findFirst: [ :kwItem | kwItem key = key])
-		scrollToSelection: true.
-
-	anArticle ifNotNil: [ wdwKeywordArticles selectArticle: anArticle ]
-]
-
-{ #category : #interaction }
-CZLibraryGUI >> showArticle: anArticle [
-
-	article := anArticle.
-
-	lstOwners items: (model articleKeywords: anArticle).
-	wdwArticle on: anArticle
-]
-
-{ #category : #action }
-CZLibraryGUI >> showArticles: aCollection [
-
-	wdwKeywordArticles onEntries: aCollection
-]
-
-{ #category : #action }
-CZLibraryGUI >> toolbarNew [
+CZLibraryGUI >> newKeywordAction [
 	"Creating a new key word"
 
 	| kw |
@@ -243,8 +134,79 @@ CZLibraryGUI >> toolbarNew [
 	model addKeyword: kw.
 ]
 
-{ #category : #action }
-CZLibraryGUI >> toolbarSave [
+{ #category : #interaction }
+CZLibraryGUI >> noArticleSelected [
+
+	wdwArticle clearForm
+]
+
+{ #category : #interaction }
+CZLibraryGUI >> noKeywordSelected [
+	lstPapers reset.
+	self noArticleSelected
+]
+
+{ #category : #'instance creation' }
+CZLibraryGUI >> on: aCollection [
+	model articles: aCollection.
+	model updateKeywordsList.
+
+]
+
+{ #category : #interaction }
+CZLibraryGUI >> resetView [
+
+	lstKeywords reset.
+	lstPapers reset
+]
+
+{ #category : #'instance creation' }
+CZLibraryGUI >> rmodBib [
+
+	model rmodBib
+]
+
+{ #category : #interaction }
+CZLibraryGUI >> saveAction [
 
 	model saveArticles
+]
+
+{ #category : #interaction }
+CZLibraryGUI >> saveArticles: czEntries on: aFileReference [
+
+	SpConfirmDialog new
+		title: 'Confirm library save';
+		label: 'Are you sure you want to overwrite the library bibfile?';
+		acceptLabel: 'Yes';
+		cancelLabel: 'No';
+		onCancel: [ ^self ];
+		openDialog.
+
+	model saveArticles: czEntries on: aFileReference
+]
+
+{ #category : #interaction }
+CZLibraryGUI >> selectKeyword: keyword andArticle: anArticle [
+
+	lstKeywords selectKey: keyword.
+	anArticle ifNotNil: [ lstPapers selectArticle: anArticle ]
+]
+
+{ #category : #interaction }
+CZLibraryGUI >> selectedKeyword: selectedKeywords [
+
+	model selectedKeyword: selectedKeywords
+]
+
+{ #category : #interaction }
+CZLibraryGUI >> showArticle: anArticle [
+
+	wdwArticle on: anArticle
+]
+
+{ #category : #interaction }
+CZLibraryGUI >> showArticles: aCollection [
+
+	lstPapers showArticles: aCollection
 ]

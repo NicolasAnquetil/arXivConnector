@@ -44,6 +44,7 @@ CZEntryPresenter >> clearForm [
 
 	txtAuthors text: ''.
 	txtTitle   text: ''.
+	txtAbstract text: ''.
 	txtYear    text: ''.
 	txtVenue   text: ''.
 	txtKind    text: ''.
@@ -140,6 +141,12 @@ CZEntryPresenter >> on: aCZEntry [
 	txtKind    text: (aCZEntry type) asString.
 	txtUrl     text: (aCZEntry at: #url) value asString.
 	txtNote    text: (aCZEntry at: #note) value asString
+]
+
+{ #category : #action }
+CZEntryPresenter >> toolbarDelete [
+
+	self shouldBeImplemented
 ]
 
 { #category : #accessing }

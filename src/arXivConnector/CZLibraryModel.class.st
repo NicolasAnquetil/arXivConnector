@@ -25,15 +25,29 @@ CZLibraryModel >> addArticles: aCollection [
 	self updateKeywordsList
 ]
 
-{ #category : #accessing }
+{ #category : #keywords }
 CZLibraryModel >> addKeyword: aString [
 
 	keywords at: aString put: OrderedCollection new.
 	view resetView.
-	view selectKey: aString andArticle: nil
+	view selectKeyword: aString andArticle: nil
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #keywords }
+CZLibraryModel >> addKeyword: keyword inArticle: aCZEntry [ 
+
+	| entryKeywords |
+	entryKeywords := self articleKeywords: aCZEntry.
+
+	aCZEntry
+		at: #keywords
+		put: (', ' join: (entryKeywords , {keyword})).
+
+	self updateKeywordsList.
+	view selectedKeyword: keyword 
+]
+
+{ #category : #testing }
 CZLibraryModel >> articleHasNote: article [
 
 	(article at: #note) isUndefined ifTrue: [ ^false ].
@@ -43,12 +57,14 @@ CZLibraryModel >> articleHasNote: article [
 	^true
 ]
 
-{ #category : #'instance creation' }
+{ #category : #keywords }
 CZLibraryModel >> articleKeywords: anArticle [
 
-	^($, split: (anArticle at: #keywords) value)
-		reject: #isEmpty
-		thenCollect: #trimBoth
+	^anArticle
+		ifNil: [ #() ]
+		ifNotNil: [ ($, split: (anArticle at: #keywords) value)
+			reject: #isEmpty
+			thenCollect: #trimBoth ]
 ]
 
 { #category : #accessing }
@@ -62,6 +78,18 @@ CZLibraryModel >> articles: anObject [
 
 	articles := anObject.
 	self updateKeywordsList
+]
+
+{ #category : #action }
+CZLibraryModel >> backupFile: aFileReference [
+
+	| backupFile |
+	backupFile := (aFileReference fullName , '~') asFileReference.
+
+	backupFile exists ifTrue: [ backupFile delete ].
+
+	aFileReference renameTo: backupFile basename
+	
 ]
 
 { #category : #action }
@@ -80,13 +108,15 @@ CZLibraryModel >> initialize [
 	articles := CZSet new
 ]
 
-{ #category : #'instance creation' }
+{ #category : #keywords }
 CZLibraryModel >> keyword: keywrd addArticle: czArticle [
 
 	| kwMembers |
+
 	kwMembers := keywords
-		             at: keywrd
-		             ifAbsentPut: [ OrderedCollection new ].
+		at: keywrd
+		ifAbsentPut: [ OrderedCollection new ].
+
 	^ kwMembers add: czArticle
 ]
 
@@ -102,14 +132,14 @@ CZLibraryModel >> keywords: anObject [
 	keywords := anObject
 ]
 
-{ #category : #'instance creation' }
+{ #category : #action }
 CZLibraryModel >> loadBibFile: bibFileName [
 
 	^ bibFileName asFileReference readStreamDo: [ :stream |
 		  CZBibParser parse: stream contents ]
 ]
 
-{ #category : #'instance creation' }
+{ #category : #initialization }
 CZLibraryModel >> myBib [
 	
 	self onBibFile: self myBibFileName 
@@ -121,20 +151,39 @@ CZLibraryModel >> myBibFileName [
 	^'/home/anquetil/Documents/RMod/Rech/literature.bib'
 ]
 
-{ #category : #accessing }
+{ #category : #action }
 CZLibraryModel >> newArticle [
 
 	^CZEntry new
 ]
 
-{ #category : #'instance creation' }
+{ #category : #initialization }
 CZLibraryModel >> onBibFile: bibFileName [
 
 	bibFile := bibFileName.
 	self articles: (self loadBibFile: bibFileName)
 ]
 
-{ #category : #'instance creation' }
+{ #category : #keywords }
+CZLibraryModel >> removeKeyword: keyword inArticle: aCZEntry [ 
+
+	| entryKeywords |
+	entryKeywords := self articleKeywords: aCZEntry.
+	entryKeywords remove: keyword.
+
+	aCZEntry
+		at: #keywords
+		put: (', ' join: entryKeywords).
+
+	self updateKeywordsList.
+
+	self keywords
+		at: keyword
+		ifPresent: [ view selectedKeyword: keyword ]
+		ifAbsent: [  view clearArticleList ]
+]
+
+{ #category : #initialization }
 CZLibraryModel >> rmodBib [
 
 	
@@ -151,10 +200,10 @@ CZLibraryModel >> rmodBibFileName [
 CZLibraryModel >> saveArticles [
 
 	| bibReferenceFile |
-
+1halt.
 	bibReferenceFile := bibFile asFileReference.
 	bibReferenceFile exists
-		ifTrue: [ bibReferenceFile delete ].
+		ifTrue: [ self backupFile: bibReferenceFile  ].
 	self saveArticles: articles on: bibReferenceFile
 ]
 
@@ -189,12 +238,15 @@ CZLibraryModel >> selectedKeyword: aKeywordEntry [
 	view showArticles:  (keywords at: aKeywordEntry)
 ]
 
-{ #category : #'instance creation' }
+{ #category : #keywords }
 CZLibraryModel >> updateKeywordsList [
+
+	keywords := Dictionary new.
 
 	self articles do: [ :czArticle |
 		(self articleKeywords: czArticle) do: [ :keywrd |
 			self keyword: keywrd addArticle: czArticle ] ].
+
 	view resetView
 ]
 

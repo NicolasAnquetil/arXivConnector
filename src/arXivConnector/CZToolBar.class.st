@@ -4,7 +4,8 @@ Class {
 	#instVars : [
 		'btnSave',
 		'btnInspect',
-		'btnNew'
+		'btnNew',
+		'btnDelete'
 	],
 	#category : #'arXivConnector-gui'
 }
@@ -15,6 +16,7 @@ CZToolBar >> defaultLayout [
 	^SpBoxLayout newLeftToRight
 		add: btnNew expand: false ;
 		add: btnSave expand: false ;
+		add: btnDelete expand: false ;
 		add: btnInspect expand: false ;
 		yourself
 ]
@@ -27,6 +29,12 @@ CZToolBar >> initializePresenters [
 		icon: (self iconNamed: #smallNew) ;
 		help: 'New item' ;
 		action: [ owner toolbarNew ] ;
+		yourself.
+
+	btnDelete  := self newButton
+		icon: (self iconNamed: #smallDelete) ;
+		help: 'Delete item' ;
+		action: [ owner toolbarDelete ] ;
 		yourself.
 
 	btnSave := self newButton

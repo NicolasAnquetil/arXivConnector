@@ -6,7 +6,6 @@ Class {
 		'lblEntries',
 		'checkEntryIcon',
 		'checkEntryBlock',
-		'model',
 		'toolbar'
 	],
 	#category : #'arXivConnector-gui'
@@ -48,9 +47,9 @@ CZEntryListPresenter >> checkEntryIcon: anObject [
 CZEntryListPresenter >> defaultLayout [
 
 	^SpBoxLayout newTopToBottom 
+		add: #toolbar expand: false ;
 		add: #lblEntries expand: false ;
 		add: #lstEntries ;
-		add: #toolbar expand: false ;
 		yourself
 ]
 
@@ -81,7 +80,7 @@ CZEntryListPresenter >> initializePresenters [
 		displayIcon: [ :entry | self iconForEntry: entry ] ;
 		sortingBlock: [:a :b | a title value < b title value ] ;
 		whenSelectionChangedDo: [ :selection | selection isEmpty
-			ifTrue: [ owner clearForm ]
+			ifTrue: [ owner noArticleSelected ]
 			ifFalse: [ self showEntry: selection ] ].
 
 	lblEntries := self newLabel.
@@ -93,13 +92,7 @@ CZEntryListPresenter >> initializePresenters [
 { #category : #accessing }
 CZEntryListPresenter >> model [
 
-	^ model
-]
-
-{ #category : #accessing }
-CZEntryListPresenter >> model: anObject [
-
-	model := anObject
+	^owner model
 ]
 
 { #category : #'instance creation' }
@@ -130,17 +123,23 @@ CZEntryListPresenter >> showEntry: selection [
 	owner showArticle: selection selectedItem
 ]
 
-{ #category : #action }
+{ #category : #interaction }
+CZEntryListPresenter >> toolbarDelete [
+	
+	self shouldBeImplemented 
+]
+
+{ #category : #interaction }
 CZEntryListPresenter >> toolbarInspect [
 ]
 
-{ #category : #action }
+{ #category : #interaction }
 CZEntryListPresenter >> toolbarNew [
 	
-	model createArticle
+	self model createArticle
 ]
 
-{ #category : #action }
+{ #category : #interaction }
 CZEntryListPresenter >> toolbarSave [
 
 	| saveFile |
