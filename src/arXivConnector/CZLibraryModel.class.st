@@ -83,6 +83,16 @@ CZLibraryModel >> articles: anObject [
 ]
 
 { #category : #action }
+CZLibraryModel >> arxivTextToCZEntry: arxivEntryText [
+
+	^[ (ArXArticleFactory new articleFrom: arxivEntryText)
+			asCitezen]
+		on: Error
+		do: [ nil ]
+
+]
+
+{ #category : #action }
 CZLibraryModel >> backupFile: aFileReference [
 
 	| backupFile |
