@@ -156,12 +156,6 @@ CZLibraryModel >> myBibFileName [
 	^'/home/anquetil/Documents/RMod/Rech/literature.bib'
 ]
 
-{ #category : #action }
-CZLibraryModel >> newArticle [
-
-	^CZEntry new
-]
-
 { #category : #initialization }
 CZLibraryModel >> onBibFile: bibFileName [
 
