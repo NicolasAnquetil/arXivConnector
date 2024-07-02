@@ -153,7 +153,7 @@ CZLibraryModel >> myBib [
 { #category : #accessing }
 CZLibraryModel >> myBibFileName [
 
-	^'/home/anquetil/Documents/RMod/Rech/literature.bib'
+	^'/home/anquetil/Documents/RMod/Rech/Refer/literature.bib'
 ]
 
 { #category : #initialization }
