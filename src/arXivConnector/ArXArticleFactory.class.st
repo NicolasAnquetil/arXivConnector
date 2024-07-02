@@ -16,8 +16,8 @@ ArXArticleFactory >> article [
 ]
 
 { #category : #factory }
-ArXArticleFactory >> articleFrom: aSteam [
-	lines := aSteam contents lines.
+ArXArticleFactory >> articleFrom: aStream [
+	lines := aStream contents lines.
 	self setMessageBounds.
 	article := ArXArticle new.
 	article title: self getTitle.
