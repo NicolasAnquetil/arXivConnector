@@ -95,10 +95,13 @@ CZLibraryModel >> backupFile: aFileReference [
 ]
 
 { #category : #action }
-CZLibraryModel >> createArticle [
+CZLibraryModel >> createArticleFromArxiv: arxivEntryText [
 
-	self keyword: selectedKeyword addArticle: self newArticle.
-	self selectedKeyword: selectedKeyword
+	(self arxivTextToCZEntry: arxivEntryText)
+	ifNotNil: [ :article |
+		self keyword: selectedKeyword addArticle: article.
+		self selectedKeyword: selectedKeyword
+	]
 ]
 
 { #category : #initialization }
