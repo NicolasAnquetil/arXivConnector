@@ -60,11 +60,13 @@ CZLibraryModel >> articleHasNote: article [
 { #category : #keywords }
 CZLibraryModel >> articleKeywords: anArticle [
 
-	^anArticle
-		ifNil: [ #() ]
-		ifNotNil: [ ($, split: (anArticle at: #keywords) value)
-			reject: #isEmpty
-			thenCollect: #trimBoth ]
+	anArticle ifNil: [ ^#() ].
+
+	(anArticle at: #keywords) isUndefined ifTrue: [ ^#( allPapers ) ].
+
+	^($, split: (anArticle at: #keywords) value)
+		reject: #isEmpty
+		thenCollect: #trimBoth
 ]
 
 { #category : #accessing }
