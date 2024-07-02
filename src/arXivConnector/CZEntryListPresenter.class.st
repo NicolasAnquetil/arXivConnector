@@ -54,6 +54,19 @@ CZEntryListPresenter >> defaultLayout [
 ]
 
 { #category : #interaction }
+CZEntryListPresenter >> getArxivEntryText [
+
+	^SpRequestTextDialog new
+		title: 'New entry';
+		label: 'arXiv email text:';
+		acceptLabel: 'OK';
+		cancelLabel: 'Cancel';
+		onCancel: [ :dialog | nil ];
+		onAccept: [ :dialog | dialog presenter text ];
+		openModal
+]
+
+{ #category : #interaction }
 CZEntryListPresenter >> iconForEntry: entry [
 
 	^ self iconNamed: ((checkEntryBlock value: entry)
@@ -136,7 +149,7 @@ CZEntryListPresenter >> toolbarInspect [
 { #category : #interaction }
 CZEntryListPresenter >> toolbarNew [
 	
-	self model createArticle
+	self model createArticleFromArxiv: self getArxivEntryText 
 ]
 
 { #category : #interaction }
